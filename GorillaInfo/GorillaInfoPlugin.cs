@@ -1,4 +1,4 @@
-﻿using BepInEx;
+using BepInEx;
 using Photon.Pun;
 using TMPro;
 using UnityEngine;
@@ -10,7 +10,7 @@ namespace GorillaInfo
     {
         private const string MyGUID = "com.SillyCody.GorillaInfo";
         private const string PluginName = "GorillaInfo";
-        private const string VersionString = "2.0.0";
+        private const string VersionString = "2.0.1";
 
         private GameObject infoTextObject;
         private TextMeshPro infoText;
@@ -18,14 +18,16 @@ namespace GorillaInfo
         private static string RoomInfo()
         {
             return PhotonNetwork.InRoom
-                ? $"Room: {PhotonNetwork.CurrentRoom.Name} | Players: {PhotonNetwork.PlayerList.Length}/10"
-                : "Not in room";
+                ? $"<color=green>Room: {PhotonNetwork.CurrentRoom.Name}</color> | Players: {PhotonNetwork.PlayerList.Length}/10"
+                : "<color=red>Not in room</color>";
         }
 
         private static string PerformanceInfo()
         {
             float fps = Mathf.Ceil(1.0f / Time.unscaledDeltaTime);
-            return $"FPS: {fps} | Ping: {PhotonNetwork.GetPing()}";
+            string fpsColor = fps <= 60 ? "<color=red>" : (fps >= 100 ? "<color=green>" : "<color=yellow>");
+
+            return $"{fpsColor}FPS: {fps}</color> | Ping: {PhotonNetwork.GetPing()}";
         }
 
         public static string Text()
@@ -42,7 +44,7 @@ namespace GorillaInfo
                 infoTextObject = new GameObject("GorillaInfoText");
                 infoText = infoTextObject.AddComponent<TextMeshPro>();
 
-                infoText.font = GorillaTagger.Instance.offlineVRRig.playerText1.font;
+                infoText.font = GameObject.Find("motdtext").GetComponent<TextMeshPro>().font;
                 infoText.fontSize = 0.35f;
                 infoText.alignment = TextAlignmentOptions.Center;
                 infoText.color = Color.white;
