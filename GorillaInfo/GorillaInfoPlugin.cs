@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using BepInEx;
 using Photon.Pun;
 using TMPro;
@@ -5,13 +6,9 @@ using UnityEngine;
 
 namespace GorillaInfo
 {
-    [BepInPlugin(MyGUID, PluginName, VersionString)]
+    [BepInPlugin(Constants.GUID, Constants.NAME, Constants.VERS)]
     public class GorillaInfoPlugin : BaseUnityPlugin
     {
-        private const string MyGUID = "com.SillyCody.GorillaInfo";
-        private const string PluginName = "GorillaInfo";
-        private const string VersionString = "2.0.1";
-
         private GameObject infoTextObject;
         private TextMeshPro infoText;
 
@@ -35,27 +32,29 @@ namespace GorillaInfo
             return $"{RoomInfo()}\n{PerformanceInfo()}\n";
         }
 
-        private void Start() => GorillaTagger.OnPlayerSpawned(InitTextObjects);
-
-        private void InitTextObjects()
+        private void Start() => GorillaTagger.OnPlayerSpawned(async delegate
         {
             if (infoTextObject == null)
             {
                 infoTextObject = new GameObject("GorillaInfoText");
                 infoText = infoTextObject.AddComponent<TextMeshPro>();
 
-                infoText.font = GameObject.Find("motdtext").GetComponent<TextMeshPro>().font;
-                infoText.fontSize = 0.35f;
-                infoText.alignment = TextAlignmentOptions.Center;
-                infoText.color = Color.white;
-                infoText.isOverlay = true;
-
                 Transform cam = Camera.main.transform;
                 infoTextObject.transform.position = cam.position + cam.forward * 1.0f - cam.up * 0.4f;
                 infoTextObject.transform.SetParent(cam);
                 infoTextObject.layer = 19;
+
+                while (infoText.font != GameObject.Find("Environment Objects/LocalObjects_Prefab/TreeRoom/CodeOfConductHeadingText").GetComponent<TextMeshPro>().font)
+                {
+                    await Task.Delay(1000);
+                    infoText.font = GameObject.Find("Environment Objects/LocalObjects_Prefab/TreeRoom/CodeOfConductHeadingText").GetComponent<TextMeshPro>().font;
+                    infoText.fontSize = 0.35f;
+                    infoText.alignment = TextAlignmentOptions.Center;
+                    infoText.color = Color.white;
+                    infoText.isOverlay = true;
+                }
             }
-        }
+        });
 
         private void Update()
         {
@@ -65,5 +64,12 @@ namespace GorillaInfo
             infoTextObject.transform.LookAt(cam);
             infoTextObject.transform.Rotate(0, 180, 0);
         }
+    }
+
+    internal class Constants
+    {
+        public const string GUID = "net.cody.gorillainfo",
+                            NAME = "GorillaInfo",
+                            VERS = "3.0.0";
     }
 }
